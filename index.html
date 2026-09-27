@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>القرآن الكريم والأحاديث النبوية</title>
+<style>
+  :root{
+    --bg:#f7f3ea; --panel:#ffffff; --ink:#22261f; --muted:#6b6558;
+    --accent:#0f6b4c; --accent-2:#c9a24b; --border:#e4ddc9; --danger:#a13d2a;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14170f; --panel:#1c2016; --ink:#eee7d6; --muted:#a7a08c;
+      --accent:#3fae82; --accent-2:#d9b45f; --border:#33392a;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14170f; --panel:#1c2016; --ink:#eee7d6; --muted:#a7a08c;
+    --accent:#3fae82; --accent-2:#d9b45f; --border:#33392a;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100%; background:var(--bg); color:var(--ink);
+    font-family:"Noto Naskh Arabic","Amiri","Segoe UI",Tahoma,sans-serif;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 16px 10px;
+    background:linear-gradient(180deg, var(--accent), #0b5139);
+    color:#fdf9ee; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+  header h1{margin:0; font-size:20px; font-weight:700;}
+  header p{margin:4px 0 0; font-size:12px; opacity:.85;}
+  nav.tabs{
+    display:flex; gap:6px; padding:10px 12px; max-width:900px; margin:0 auto;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    flex:1; min-width:100px; padding:10px 8px; border-radius:10px; border:1px solid var(--border);
+    background:var(--panel); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700;
+    cursor:pointer;
+  }
+  nav.tabs button.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+  main{max-width:900px; margin:0 auto; padding:0 14px 40px;}
+  section.view{display:none;}
+  section.view.active{display:block;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    padding:14px; margin-bottom:14px;
+  }
+  .row{display:flex; gap:10px; flex-wrap:wrap;}
+  .row > div{flex:1; min-width:160px;}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:4px;}
+  select, input[type=text]{
+    width:100%; padding:10px; border-radius:10px; border:1px solid var(--border);
+    background:var(--bg); color:var(--ink); font-family:inherit; font-size:14px;
+  }
+  button.btn{
+    padding:10px 16px; border-radius:10px; border:none; background:var(--accent);
+    color:#fff; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer;
+  }
+  button.btn.secondary{background:var(--accent-2); color:#2a1f04;}
+  button.btn.ghost{background:transparent; border:1px solid var(--border); color:var(--ink);}
+  button.btn:disabled{opacity:.5; cursor:default;}
+  .ayah{
+    border-bottom:1px dashed var(--border); padding:16px 4px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .ayah:last-child{border-bottom:none;}
+  .ayah .num{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--accent-2);
+    color:#2a1f04; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+  }
+  .ayah .text{
+    flex:1; font-family:"Noto Naskh Arabic","Amiri","Times New Roman",serif; font-size:26px; line-height:2.1; text-align:justify;
+  }
+  .ayah button.play{
+    flex:0 0 auto; background:none; border:1px solid var(--border); border-radius:8px;
+    padding:6px 10px; color:var(--accent); cursor:pointer; font-size:13px;
+  }
+  .hadith-item{
+    border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px; background:var(--bg);
+  }
+  .hadith-item h3{margin:0 0 8px; font-size:15px; color:var(--accent);}
+  .hadith-item .txt{font-size:17px; line-height:2; font-family:"Noto Naskh Arabic","Amiri","Times New Roman",serif;}
+  .hadith-item .src{margin-top:8px; font-size:12px; color:var(--muted);}
+  mark{background:var(--accent-2); color:#2a1f04; border-radius:3px;}
+  .status{font-size:13px; color:var(--muted); padding:10px 4px;}
+  .status.err{color:var(--danger);}
+  .note{
+    font-size:12px; color:var(--muted); background:var(--bg); border:1px dashed var(--border);
+    border-radius:10px; padding:10px 12px; margin-bottom:14px; line-height:1.8;
+  }
+  .searchbar{display:flex; gap:8px; margin-bottom:10px;}
+  .result{padding:10px; border-bottom:1px solid var(--border); font-size:15px; line-height:1.9;}
+  .result b{color:var(--accent);}
+  footer{text-align:center; font-size:11px; color:var(--muted); padding:20px 10px;}
+  .player-bar{
+    position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--border);
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px)); display:none; gap:10px; align-items:center;
+    box-shadow:0 -2px 10px rgba(0,0,0,.08);
+  }
+  .player-bar.show{display:flex;}
+  .player-bar span{font-size:13px; color:var(--muted); flex:1;}
+  audio{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>القرآن الكريم والأحاديث النبوية</h1>
+  <p>نص القرآن وتلاواته وأحاديث الأربعين النووية، مع البحث</p>
+</header>
+
+<nav class="tabs">
+  <button data-tab="quran" class="active">📖 القرآن</button>
+  <button data-tab="hadith">📜 الأحاديث</button>
+  <button data-tab="search">🔎 بحث</button>
+  <button data-tab="about">ℹ️ حول الموقع</button>
+</nav>
+
+<main>
+
+  <!-- ===================== QURAN TAB ===================== -->
+  <section class="view active" id="tab-quran">
+    <div class="note">
+      نص القرآن يُجلب من مصدر خارجي موثوق عند الاتصال بالإنترنت، ويمكن تنزيله وحفظه على الجهاز للاستخدام دون إنترنت.
+      التلاوات تُحمّل من المصدر نفسه، ويمكن حفظ صوت السورة الحالية للاستخدام لاحقًا دون اتصال.
+    </div>
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>السورة</label>
+          <select id="surahSelect"><option>جارٍ التحميل…</option></select>
+        </div>
+        <div>
+          <label>القارئ</label>
+          <select id="reciterSelect"><option>جارٍ التحميل…</option></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="loadSurahBtn">عرض السورة</button>
+        <button class="btn secondary" id="playAllBtn" disabled>▶ تشغيل السورة كاملة</button>
+        <button class="btn ghost" id="stopBtn" disabled>■ إيقاف</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">📦 الاستخدام دون إنترنت</h3>
+      <div class="note" style="margin-bottom:10px;">
+        حمّل نص القرآن كاملًا إلى جهازك، ويمكنك أيضًا حفظ صوت السورة المعروضة للقارئ المختار.
+        بعد نجاح التنزيل يمكنك قراءة النص والبحث فيه وتشغيل الصوت المحفوظ دون اتصال بالإنترنت.
+        قد تحتاج حزمة الصوت إلى مساحة تخزين كبيرة بحسب السور والقارئ.
+      </div>
+      <div class="row">
+        <button class="btn" id="downloadQuranTextBtn">⬇️ تنزيل نص القرآن</button>
+        <button class="btn secondary" id="downloadSurahAudioBtn" disabled>🎧 حفظ صوت السورة</button>
+        <button class="btn ghost" id="clearOfflineBtn">🗑️ حذف الحزمة</button>
+      </div>
+      <div class="status" id="offlineStatus"></div>
+    </div>
+    <div class="status" id="quranStatus"></div>
+    <div class="card" id="ayahList" style="display:none;"></div>
+  </section>
+
+  <!-- ===================== HADITH TAB ===================== -->
+  <section class="view" id="tab-hadith">
+    <div class="note">
+      الأربعون النووية وتكملتها لابن رجب إلى خمسين حديثًا — مجموعة مختصرة موثقة، مع تخريج كل حديث وبيان درجته كما هو مذكور في المصدر.
+      مع تخريج كل حديث (رواه البخاري ومسلم، أو غيرهما). لكل حديث درجته المذكورة في المتن الأصلي.
+    </div>
+    <div class="searchbar">
+      <input type="text" id="hadithSearch" placeholder="ابحث في الأحاديث (كلمة أو عبارة)…">
+    </div>
+    <div id="hadithList"></div>
+  </section>
+
+  <!-- ===================== SEARCH TAB ===================== -->
+  <section class="view" id="tab-search">
+    <div class="note">
+      يبحث القسم الأول في كامل نص القرآن الكريم عبر مصدر موثوق مباشرةً (يحتاج اتصالاً بالإنترنت)، والقسم الثاني يبحث في الأحاديث المضمّنة في هذه الصفحة.
+    </div>
+    <div class="card">
+      <label>ابحث في القرآن الكريم</label>
+      <div class="searchbar">
+        <input type="text" id="quranSearch" placeholder="مثال: الرحمن، الصبر، يس…">
+        <button class="btn" id="quranSearchBtn">بحث</button>
+      </div>
+      <div id="quranSearchResults"></div>
+    </div>
+    <div class="card">
+      <label>ابحث في الأحاديث</label>
+      <div class="searchbar">
+        <input type="text" id="hadithSearch2" placeholder="ابحث في الأحاديث…">
+      </div>
+      <div id="hadithSearchResults"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ABOUT TAB ===================== -->
+  <section class="view" id="tab-about">
+    <div class="card">
+      <h2 style="margin-top:0;">حول هذا الموقع</h2>
+      <p>
+        نص القرآن الكريم (بكامل التشكيل) والتلاوات الصوتية في هذه الصفحة تُجلب مباشرة، عند التصفح، من واجهة برمجية موثوقة ومجانية
+        هي <b>Al Quran Cloud</b> (alquran.cloud)، والتي تعتمد رواية حفص برسم عثماني معتمد. هذا يضمن أن النص المعروض مطابق تمامًا
+        للمصدر دون أي تدخل يدوي قد يُدخل خطأ في الكتابة أو التشكيل.
+      </p>
+      <p>
+        أحاديث هذه الصفحة هي متن <b>الأربعين النووية</b> (وزيادة الحافظ ابن رجب حتى خمسين حديثًا)، وهي مجموعة مختصرة من الأحاديث
+        الصحيحة والحسنة الجامعة لأصول الدين، مأخوذة كاملة من مصدرها المحفوظ، وليست شاملة لكل الأحاديث الصحيحة (فتلك تتجاوز 14 ألف
+        حديث بين البخاري ومسلم وحدهما).
+      </p>
+      <p><b>ملاحظة تقنية مهمة:</b> يعمل قسم الأحاديث والبحث فيه دون إنترنت لأنه مضمّن داخل الملف.
+      أما القرآن والتلاوة فيمكن تنزيلهما إلى التخزين المحلي من زر «تنزيل نص القرآن» وحفظ صوت السورة.
+      بعد التنزيل، يستطيع التطبيق استخدام البيانات المحفوظة دون الاتصال بالخادم الخارجي. لا يتطلب ذلك تثبيت خط أو مكتبة خارجية.</p>
+    </div>
+  </section>
+
+</main>
+
+<div class="player-bar" id="playerBar">
+  <span id="playerStatus">جارٍ التشغيل…</span>
+  <button class="btn ghost" id="playerStopBtn">إيقاف</button>
+</div>
+<audio id="audioEl"></audio>
+
+<footer>القرآن الكريم — رواية حفص عن عاصم، رسم عثماني · الأحاديث: متن الأربعين النووية</footer>
+
+<script>
+const API = "https://api.alquran.cloud/v1";
+const audioEl = document.getElementById('audioEl');
+
+const DB_NAME = 'quranHadithOffline';
+const DB_VERSION = 1;
+const STORE_META = 'meta';
+const STORE_AUDIO = 'audio';
+
+function openOfflineDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(STORE_META)) db.createObjectStore(STORE_META);
+      if(!db.objectStoreNames.contains(STORE_AUDIO)) db.createObjectStore(STORE_AUDIO);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function dbPut(store,key,value){
+  const db=await openOfflineDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(value,key);
+    tx.oncomplete=()=>{db.close();resolve();}; tx.onerror=()=>{db.close();reject(tx.error);};
+  });
+}
+async function dbGet(store,key){
+  const db=await openOfflineDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(store,'readonly'); const req=tx.objectStore(store).get(key);
+    req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
+    tx.oncomplete=()=>db.close();
+  });
+}
+async function dbDeleteAll(){
+  const db=await openOfflineDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction([STORE_META,STORE_AUDIO],'readwrite');
+    tx.objectStore(STORE_META).clear(); tx.objectStore(STORE_AUDIO).clear();
+    tx.oncomplete=()=>{db.close();resolve();}; tx.onerror=()=>{db.close();reject(tx.error);};
+  });
+}
+function setOfflineStatus(msg,error=false){
+  const el=document.getElementById('offlineStatus'); el.textContent=msg;
+  el.className='status'+(error?' err':'');
+}
+async function getCachedQuran(){return await dbGet(STORE_META,'quran-uthmani');}
+async function getCachedAudio(reciter,surah,ayah){return await dbGet(STORE_AUDIO,reciter+'|'+surah+'|'+ayah);}
+async function cacheAudio(reciter,surah,ayah,blob){await dbPut(STORE_AUDIO,reciter+'|'+surah+'|'+ayah,blob);}
+
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.view').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ---------- Surah + reciter lists ----------
+const surahSelect = document.getElementById('surahSelect');
+const reciterSelect = document.getElementById('reciterSelect');
+const quranStatus = document.getElementById('quranStatus');
+
+async function initQuranLists(){
+  try{
+    const cached=await getCachedQuran();
+    const [surahRes,editionRes]=await Promise.all([
+      fetch(API+"/surah").then(r=>{if(!r.ok)throw new Error();return r.json();}),
+      fetch(API+"/edition?format=audio&language=ar&type=versebyverse").then(r=>{if(!r.ok)throw new Error();return r.json();})
+    ]);
+    surahSelect.innerHTML='';
+    surahRes.data.forEach(s=>{const o=document.createElement('option');o.value=s.number;o.textContent=s.number+'. '+s.name+' ('+s.englishName+')';surahSelect.appendChild(o);});
+    reciterSelect.innerHTML='';
+    editionRes.data.forEach(e=>{const o=document.createElement('option');o.value=e.identifier;o.textContent=e.name;if(e.identifier==='ar.alafasy')o.selected=true;reciterSelect.appendChild(o);});
+    quranStatus.textContent=cached?'جاهز — توجد نسخة محلية من نص القرآن. يمكنك استخدامها دون إنترنت.':'جاهز — اختر سورة واضغط «عرض السورة».';
+  }catch(err){
+    const cached=await getCachedQuran().catch(()=>null);
+    if(cached){
+      surahSelect.innerHTML='';
+      cached.data.surahs.forEach(s=>{const o=document.createElement('option');o.value=s.number;o.textContent=s.number+'. '+s.name;surahSelect.appendChild(o);});
+      reciterSelect.innerHTML='<option value="ar.alafasy">مشاري العفاسي</option>';
+      quranStatus.textContent='وضع عدم الاتصال: النص المحلي متاح. قائمة القرّاء تحتاج الإنترنت.';
+    }else{
+      quranStatus.textContent='⚠️ تعذّر الاتصال بمصدر القرآن. نزّل حزمة النص أثناء الاتصال بالإنترنت أولًا.';
+      quranStatus.className='status err'; surahSelect.innerHTML='<option value="">غير متاح</option>';
+      reciterSelect.innerHTML='<option value="ar.alafasy">مشاري العفاسي</option>';
+    }
+  }
+}
+initQuranLists();
+
+// ---------- Load & display a surah ----------
+let currentAyahs = [];
+let playIndex = 0;
+let playingAll = false;
+
+document.getElementById('loadSurahBtn').addEventListener('click', loadSurah);
+
+async function loadSurah(){
+  const num=parseInt(surahSelect.value,10), reciter=reciterSelect.value;
+  const list=document.getElementById('ayahList'), audioButton=document.getElementById('downloadSurahAudioBtn');
+  quranStatus.textContent='جارٍ التحميل…'; quranStatus.className='status'; list.style.display='none';
+  document.getElementById('playAllBtn').disabled=true; audioButton.disabled=true;
+  try{
+    let textAyahs=null,audioAyahs=null; const cached=await getCachedQuran();
+    if(cached&&cached.data&&cached.data.surahs){const local=cached.data.surahs.find(x=>x.number===num);if(local)textAyahs=local.ayahs;}
+    if(!textAyahs){
+      const res=await fetch(API+"/surah/"+num+"/editions/quran-uthmani,"+reciter); if(!res.ok)throw new Error();
+      const data=await res.json();
+      const textEd=data.data.find(x=>x.edition&&x.edition.identifier==='quran-uthmani')||data.data[0];
+      const audioEd=data.data.find(x=>x.edition&&x.edition.identifier===reciter)||data.data[1];
+      textAyahs=textEd.ayahs; audioAyahs=audioEd?audioEd.ayahs:[];
+    }else{
+      try{const res=await fetch(API+"/surah/"+num+"/editions/quran-uthmani,"+reciter);if(res.ok){const data=await res.json();const audioEd=data.data.find(x=>x.edition&&x.edition.identifier===reciter);audioAyahs=audioEd?audioEd.ayahs:[];}}catch(_){}
+    }
+    currentAyahs=textAyahs.map((a,i)=>({num:a.numberInSurah,text:a.text,audio:audioAyahs&&audioAyahs[i]?audioAyahs[i].audio:null}));
+    list.innerHTML=''; currentAyahs.forEach((a,i)=>{const div=document.createElement('div');div.className='ayah';div.innerHTML='<div class="num">'+a.num+'</div><div class="text">'+a.text+'</div><button class="play" data-i="'+i+'" '+(a.audio?'':'disabled')+'>▶</button>';list.appendChild(div);});
+    list.style.display='block'; list.querySelectorAll('button.play').forEach(b=>b.addEventListener('click',()=>playOne(parseInt(b.dataset.i,10))));
+    quranStatus.textContent='عدد الآيات: '+currentAyahs.length; document.getElementById('playAllBtn').disabled=!currentAyahs.some(a=>a.audio);
+    audioButton.disabled=!currentAyahs.length; window.currentSurahNumber=num; window.currentReciter=reciter;
+  }catch(err){quranStatus.textContent='⚠️ تعذّر تحميل السورة. إذا كنت دون إنترنت، نزّل النص والصوت مسبقًا.';quranStatus.className='status err';}
+}
+
+function showPlayerBar(msg){
+  document.getElementById('playerBar').classList.add('show');
+  document.getElementById('playerStatus').textContent = msg;
+  document.getElementById('stopBtn').disabled = false;
+}
+function hidePlayerBar(){
+  document.getElementById('playerBar').classList.remove('show');
+  document.getElementById('stopBtn').disabled = true;
+}
+
+async function playOne(i){
+  playingAll=false; const a=currentAyahs[i]; if(!a)return; const reciter=window.currentReciter||reciterSelect.value; const surah=window.currentSurahNumber||parseInt(surahSelect.value,10);
+  const cached=await getCachedAudio(reciter,surah,a.num).catch(()=>null);
+  if(cached){if(window.currentAudioUrl)URL.revokeObjectURL(window.currentAudioUrl);window.currentAudioUrl=URL.createObjectURL(cached);audioEl.src=window.currentAudioUrl;}
+  else if(a.audio)audioEl.src=a.audio;
+  else{setOfflineStatus('لا يوجد صوت محفوظ لهذه الآية.',true);return;}
+  audioEl.play().catch(()=>{}); showPlayerBar('تشغيل الآية '+a.num);
+}
+
+document.getElementById('playAllBtn').addEventListener('click', ()=>{
+  if(!currentAyahs.length) return;
+  playingAll = true;
+  playIndex = 0;
+  playNext();
+});
+async function playNext(){
+  if(!playingAll||playIndex>=currentAyahs.length){playingAll=false;hidePlayerBar();return;}
+  const a=currentAyahs[playIndex],reciter=window.currentReciter||reciterSelect.value,surah=window.currentSurahNumber||parseInt(surahSelect.value,10);
+  const cached=await getCachedAudio(reciter,surah,a.num).catch(()=>null);
+  if(cached){if(window.currentAudioUrl)URL.revokeObjectURL(window.currentAudioUrl);window.currentAudioUrl=URL.createObjectURL(cached);audioEl.src=window.currentAudioUrl;}
+  else if(a.audio)audioEl.src=a.audio;
+  else{playingAll=false;hidePlayerBar();setOfflineStatus('توقّف التشغيل: الصوت غير محفوظ لهذه الآية.',true);return;}
+  audioEl.play().catch(()=>{});showPlayerBar('تشغيل الآية '+a.num+' من '+currentAyahs.length);playIndex++;
+}
+audioEl.addEventListener('ended', ()=>{ if(playingAll) playNext(); });
+
+function stopAudio(){
+  playingAll=false; audioEl.pause(); audioEl.removeAttribute('src');
+  if(window.currentAudioUrl){URL.revokeObjectURL(window.currentAudioUrl);window.currentAudioUrl=null;}
+  hidePlayerBar();
+}
+document.getElementById('stopBtn').addEventListener('click', stopAudio);
+document.getElementById('playerStopBtn').addEventListener('click', stopAudio);
+
+// ---------- Quran search (live API) ----------
+document.getElementById('quranSearchBtn').addEventListener('click', doQuranSearch);
+document.getElementById('quranSearch').addEventListener('keydown', e=>{ if(e.key==='Enter') doQuranSearch(); });
+
+async function doQuranSearch(){
+  const q=document.getElementById('quranSearch').value.trim(),box=document.getElementById('quranSearchResults');
+  if(!q){box.innerHTML='';return;} box.innerHTML='<div class="status">جارٍ البحث…</div>';
+  try{
+    const cached=await getCachedQuran();
+    if(cached&&cached.data&&cached.data.surahs){
+      const matches=[]; cached.data.surahs.forEach(s=>s.ayahs.forEach(a=>{if(a.text.includes(q))matches.push({surah:{name:s.name},numberInSurah:a.numberInSurah,text:a.text});}));
+      if(!matches.length){box.innerHTML='<div class="status">لا توجد نتائج في النسخة المحلية.</div>';return;} box.innerHTML='';
+      matches.slice(0,50).forEach(m=>{const div=document.createElement('div');div.className='result';div.innerHTML='<b>'+m.surah.name+' ('+m.numberInSurah+')</b><br>'+m.text;box.appendChild(div);});return;
+    }
+    const data=await fetch(API+"/search/"+encodeURIComponent(q)+"/all/quran-uthmani").then(r=>{if(!r.ok)throw new Error();return r.json();});
+    if(data.code!==200||!data.data.matches.length){box.innerHTML='<div class="status">لا توجد نتائج.</div>';return;} box.innerHTML='';
+    data.data.matches.slice(0,50).forEach(m=>{const div=document.createElement('div');div.className='result';div.innerHTML='<b>'+m.surah.name+' ('+m.numberInSurah+')</b><br>'+m.text;box.appendChild(div);});
+  }catch(err){box.innerHTML='<div class="status err">⚠️ لا توجد نسخة محلية ولا يمكن الوصول إلى البحث عبر الإنترنت.</div>';}
+}
+
+// ---------- Offline package ----------
+document.getElementById('downloadQuranTextBtn').addEventListener('click',async()=>{
+  const btn=document.getElementById('downloadQuranTextBtn');btn.disabled=true;setOfflineStatus('جارٍ تنزيل نص القرآن…');
+  try{const res=await fetch(API+'/quran/quran-uthmani');if(!res.ok)throw new Error();const data=await res.json();await dbPut(STORE_META,'quran-uthmani',data);setOfflineStatus('✅ تم حفظ نص القرآن كاملًا على الجهاز. يمكنك القراءة والبحث دون إنترنت.');quranStatus.textContent='توجد نسخة محلية من نص القرآن.';}
+  catch(err){setOfflineStatus('⚠️ فشل تنزيل نص القرآن. تحقق من الاتصال وحاول مرة أخرى.',true);}finally{btn.disabled=false;}
+});
+document.getElementById('downloadSurahAudioBtn').addEventListener('click',async()=>{
+  const btn=document.getElementById('downloadSurahAudioBtn'),surah=window.currentSurahNumber,reciter=window.currentReciter||reciterSelect.value;if(!surah||!currentAyahs.length)return;btn.disabled=true;
+  try{let done=0;for(const a of currentAyahs){if(!a.audio)continue;const existing=await getCachedAudio(reciter,surah,a.num).catch(()=>null);if(existing){done++;continue;}const res=await fetch(a.audio);if(!res.ok)throw new Error();const blob=await res.blob();await cacheAudio(reciter,surah,a.num,blob);done++;setOfflineStatus('جارٍ حفظ الصوت: '+done+' / '+currentAyahs.length);}setOfflineStatus('✅ تم حفظ صوت السورة للقارئ المختار. يمكنك تشغيلها دون إنترنت.');}
+  catch(err){setOfflineStatus('⚠️ تعذّر حفظ الصوت. تحقق من الاتصال ومساحة التخزين وحاول مرة أخرى.',true);}finally{btn.disabled=false;}
+});
+document.getElementById('clearOfflineBtn').addEventListener('click',async()=>{if(!confirm('هل تريد حذف نص القرآن والصوت المحفوظ من هذا الجهاز؟'))return;try{await dbDeleteAll();setOfflineStatus('تم حذف الحزمة المحلية.');}catch(err){setOfflineStatus('تعذّر حذف الحزمة المحلية.',true);}});
+
+// ---------- Hadith data (embedded) ----------
+const HADITH = [
+{n:1, title:"الحديث الأول: إنما الأعمال بالنيات", txt:"عَنْ أَمِيرِ المُؤْمِنِينَ أَبِي حَفْصٍ عُمَرَ بْنِ الخَطّابِ رضي الله عنه قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: «إنَّما الأَعْمالُ بِالنِّيّاتِ، وَإِنَّما لِكُلِّ امْرِئٍ ما نَوَى، فَمَنْ كانَتْ هِجْرَتُهُ إلَى اللَّهِ وَرَسُولِهِ فَهِجْرَتُهُ إلَى اللَّهِ وَرَسُولِهِ، وَمَنْ كانَتْ هِجْرَتُهُ لِدُنْيا يُصِيبُها أَوْ امْرَأَةٍ يَنْكِحُها فَهِجْرَتُهُ إلَى ما هاجَرَ إلَيْهِ».", src:"رواه البخاري ومسلم في صحيحيهما."},
+{n:2, title:"الحديث الثاني: سؤال جبريل عن الإسلام والإيمان والإحسان", txt:"عَنْ عُمَرَ رضي الله عنه أيضًا قالَ: بَيْنَما نَحْنُ جُلُوسٌ عِنْدَ رَسُولِ اللَّهِ ﷺ ذاتَ يَوْمٍ، إذْ طَلَعَ عَلَيْنا رَجُلٌ شَدِيدُ بَياضِ الثِّيابِ، شَدِيدُ سَوادِ الشَّعْرِ، لا يُرَى عَلَيْهِ أَثَرُ السَّفَرِ، وَلا يَعْرِفُهُ مِنّا أَحَدٌ، حَتَّى جَلَسَ إلَى النَّبِيِّ ﷺ فَأَسْنَدَ رُكْبَتَيْهِ إلَى رُكْبَتَيْهِ وَوَضَعَ كَفَّيْهِ عَلَى فَخْذَيْهِ وَقالَ: يا مُحَمَّدُ أَخْبِرْنِي عَنِ الإِسْلامِ. فَقالَ رَسُولُ اللَّهِ ﷺ: «الإِسْلامُ أَنْ تَشْهَدَ أَنْ لا إلَهَ إلّا اللَّهُ وَأَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، وَتُقِيمَ الصَّلاةَ، وَتُؤْتِيَ الزَّكاةَ، وَتَصُومَ رَمَضانَ، وَتَحُجَّ البَيْتَ إنِ اسْتَطَعْتَ إلَيْهِ سَبِيلًا» قالَ: صَدَقْتَ. فَعَجِبْنا لَهُ يَسْأَلُهُ وَيُصَدِّقُهُ! قالَ: فَأَخْبِرْنِي عَنِ الإِيمانِ. قالَ: «أَنْ تُؤْمِنَ بِاللَّهِ وَمَلائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ وَاليَوْمِ الآخِرِ، وَتُؤْمِنَ بِالقَدَرِ خَيْرِهِ وَشَرِّهِ» قالَ: صَدَقْتَ. قالَ: فَأَخْبِرْنِي عَنِ الإِحْسانِ. قالَ: «أَنْ تَعْبُدَ اللَّهَ كَأَنَّكَ تَراهُ، فَإِنْ لَمْ تَكُنْ تَراهُ فَإِنَّهُ يَراكَ» قالَ: فَأَخْبِرْنِي عَنِ السّاعَةِ. قالَ: «ما المَسْئُولُ عَنْها بِأَعْلَمَ مِنَ السّائِلِ» قالَ: فَأَخْبِرْنِي عَنْ أَماراتِها. قالَ: «أَنْ تَلِدَ الأَمَةُ رَبَّتَها، وَأَنْ تَرَى الحُفاةَ العُراةَ العالَةَ رِعاءَ الشّاءِ يَتَطاوَلُونَ فِي البُنْيانِ» ثُمَّ انْطَلَقَ فَلَبِثْتُ مَلِيًّا، ثُمَّ قالَ: «يا عُمَرُ أَتَدْرِي مَنِ السّائِلُ؟» قُلْتُ: اللَّهُ وَرَسُولُهُ أَعْلَمُ. قالَ: «فَإِنَّهُ جِبْرِيلُ أَتاكُمْ يُعَلِّمُكُمْ دِينَكُمْ».", src:"رواه مسلم."},
+{n:3, title:"الحديث الثالث: أركان الإسلام الخمسة", txt:"عَنْ أَبِي عَبْدِ الرَّحْمَنِ عَبْدِ اللَّهِ بْنِ عُمَرَ بْنِ الخَطّابِ رضي الله عنهما قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: «بُنِيَ الإِسْلامُ عَلَى خَمْسٍ: شَهادَةِ أَنْ لا إلَهَ إلّا اللَّهُ وَأَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، وَإِقامِ الصَّلاةِ، وَإِيتاءِ الزَّكاةِ، وَحَجِّ البَيْتِ، وَصَوْمِ رَمَضانَ».", src:"رواه البخاري ومسلم."},
+{n:4, title:"الحديث الرابع: أطوار خلق الإنسان والقدر", txt:"عَنْ أَبِي عَبْدِ الرَّحْمَنِ عَبْدِ اللَّهِ بْنِ مَسْعُودٍ رضي الله عنه قالَ: حَدَّثَنا رَسُولُ اللَّهِ ﷺ وَهُوَ الصّادِقُ المَصْدُوقُ: «إنَّ أَحَدَكُمْ يُجْمَعُ خَلْقُهُ فِي بَطْنِ أُمِّهِ أَرْبَعِينَ يَوْمًا نُطْفَةً، ثُمَّ يَكُونُ عَلَقَةً مِثْلَ ذَلِكَ، ثُمَّ يَكُونُ مُضْغَةً مِثْلَ ذَلِكَ، ثُمَّ يُرْسَلُ إلَيْهِ المَلَكُ فَيَنْفُخُ فِيهِ الرُّوحَ، وَيُؤْمَرُ بِأَرْبَعِ كَلِماتٍ: بِكَتْبِ رِزْقِهِ وَأَجَلِهِ وَعَمَلِهِ وَشَقِيٍّ أَمْ سَعِيدٍ، فَوَاللَّهِ الَّذِي لا إلَهَ غَيْرُهُ إنَّ أَحَدَكُمْ لَيَعْمَلُ بِعَمَلِ أَهْلِ الجَنَّةِ حَتَّى ما يَكُونُ بَيْنَهُ وَبَيْنَها إلّا ذِراعٌ فَيَسْبِقُ عَلَيْهِ الكِتابُ فَيَعْمَلُ بِعَمَلِ أَهْلِ النّارِ فَيَدْخُلُها، وَإِنَّ أَحَدَكُمْ لَيَعْمَلُ بِعَمَلِ أَهْلِ النّارِ حَتَّى ما يَكُونُ بَيْنَهُ وَبَيْنَها إلّا ذِراعٌ فَيَسْبِقُ عَلَيْهِ الكِتابُ فَيَعْمَلُ بِعَمَلِ أَهْلِ الجَنَّةِ فَيَدْخُلُها».", src:"رواه البخاري ومسلم."},
+{n:5, title:"الحديث الخامس: من أحدث في ديننا ما ليس منه", txt:"عَنْ أُمِّ المُؤْمِنِينَ عائِشَةَ رضي الله عنها قالَتْ: قالَ رَسُولُ اللَّهِ ﷺ: «مَنْ أَحْدَثَ فِي أَمْرِنا هَذا ما لَيْسَ مِنْهُ فَهُوَ رَدٌّ». وفي رواية لمسلم: «مَنْ عَمِلَ عَمَلًا لَيْسَ عَلَيْهِ أَمْرُنا فَهُوَ رَدٌّ».", src:"رواه البخاري ومسلم."},
+{n:6, title:"الحديث السادس: الحلال بيّن والحرام بيّن", txt:"عَنْ أَبِي عَبْدِ اللَّهِ النُّعْمانِ بْنِ بَشِيرٍ رضي الله عنهما قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: «إنَّ الحَلالَ بَيِّنٌ وَإنَّ الحَرامَ بَيِّنٌ، وَبَيْنَهُما أُمُورٌ مُشْتَبِهاتٌ لا يَعْلَمُهُنَّ كَثِيرٌ مِنَ النّاسِ، فَمَنِ اتَّقَى الشُّبُهاتِ فَقَدِ اسْتَبْرَأَ لِدِينِهِ وَعِرْضِهِ، وَمَنْ وَقَعَ فِي الشُّبُهاتِ وَقَعَ فِي الحَرامِ، كَالرّاعِي يَرْعَى حَوْلَ الحِمَى يُوشِكُ أَنْ يَرْتَعَ فِيهِ، أَلا وَإِنَّ لِكُلِّ مَلِكٍ حِمًى، أَلا وَإِنَّ حِمَى اللَّهِ مَحارِمُهُ، أَلا وَإِنَّ فِي الجَسَدِ مُضْغَةً إذا صَلَحَتْ صَلَحَ الجَسَدُ كُلُّهُ، وَإذا فَسَدَتْ فَسَدَ الجَسَدُ كُلُّهُ، أَلا وَهِيَ القَلْبُ».", src:"رواه البخاري ومسلم."},
+{n:7, title:"الحديث السابع: الدين النصيحة", txt:"عَنْ أَبِي رُقَيَّةَ تَمِيمِ بْنِ أَوْسٍ الدّارِيِّ رضي الله عنه أَنَّ النَّبِيَّ ﷺ قالَ: «الدِّينُ النَّصِيحَةُ» قُلْنا: لِمَنْ؟ قالَ: «لِلَّهِ، وَلِكِتابِهِ، وَلِرَسُولِهِ، وَلِأَئِمَّةِ المُسْلِمِينَ وَعامَّتِهِمْ».", src:"رواه مسلم."},
+{n:8, title:"الحديث الثامن: أُمرت أن أقاتل الناس", txt:"عَنِ ابْنِ عُمَرَ رضي الله عنهما أَنَّ رَسُولَ اللَّهِ ﷺ قالَ: «أُمِرْتُ أَنْ أُقاتِلَ النّاسَ حَتَّى يَشْهَدُوا أَنْ لا إلَهَ إلّا اللَّهُ وَأَنَّ مُحَمَّدًا رَسُولُ اللَّهِ، وَيُقِيمُوا الصَّلاةَ، وَيُؤْتُوا الزَّكاةَ، فَإِذا فَعَلُوا ذَلِكَ عَصَمُوا مِنِّي دِماءَهُمْ وَأَمْوالَهُمْ إلّا بِحَقِّ الإِسْلامِ، وَحِسابُهُمْ عَلَى اللَّهِ تَعالَى».", src:"رواه البخاري ومسلم."},
+{n:9, title:"الحديث التاسع: ما نهيتكم عنه فاجتنبوه", txt:"عَنْ أَبِي هُرَيْرَةَ عَبْدِ الرَّحْمَنِ بْنِ صَخْرٍ رضي الله عنه قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: «ما نَهَيْتُكُمْ عَنْهُ فاجْتَنِبُوهُ، وَما أَمَرْتُكُمْ بِهِ فَأْتُوا مِنْهُ ما اسْتَطَعْتُمْ، فَإِنَّما أَهْلَكَ الَّذِينَ مِنْ قَبْلِكُمْ كَثْرَةُ مَسائِلِهِمْ وَاخْتِلافُهُمْ عَلَى أَنْبِيائِهِمْ».", src:"رواه البخاري ومسلم."},
+{n:10, title:"الحديث العاشر: إن الله طيّب لا يقبل إلا طيّبًا", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «إنَّ اللَّهَ طَيِّبٌ لا يَقْبَلُ إلّا طَيِّبًا، وَإنَّ اللَّهَ أَمَرَ المُؤْمِنِينَ بِما أَمَرَ بِهِ المُرْسَلِينَ، فَقالَ تَعالَى: ﴿يا أَيُّهَا الرُّسُلُ كُلُوا مِنَ الطَّيِّباتِ وَاعْمَلُوا صالِحًا﴾، وَقالَ تَعالَى: ﴿يا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِنْ طَيِّباتِ ما رَزَقْناكُمْ﴾، ثُمَّ ذَكَرَ الرَّجُلَ يُطِيلُ السَّفَرَ أَشْعَثَ أَغْبَرَ يَمُدُّ يَدَيْهِ إلَى السَّماءِ: يا رَبِّ يا رَبِّ، وَمَطْعَمُهُ حَرامٌ وَمَشْرَبُهُ حَرامٌ وَمَلْبَسُهُ حَرامٌ وَغُذِّيَ بِالحَرامِ، فَأَنَّى يُسْتَجابُ لَهُ؟».", src:"رواه مسلم."},
+{n:11, title:"الحديث الحادي عشر: دع ما يريبك إلى ما لا يريبك", txt:"عَنْ أَبِي مُحَمَّدٍ الحَسَنِ بْنِ عَلِيٍّ رضي الله عنهما قالَ: حَفِظْتُ مِنْ رَسُولِ اللَّهِ ﷺ: «دَعْ ما يُرِيبُكَ إلَى ما لا يُرِيبُكَ».", src:"رواه الترمذي والنسائي، وقال الترمذي: حديث حسن صحيح."},
+{n:12, title:"الحديث الثاني عشر: من حسن إسلام المرء تركه ما لا يعنيه", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «مِنْ حُسْنِ إسْلامِ المَرْءِ تَرْكُهُ ما لا يَعْنِيهِ».", src:"حديث حسن، رواه الترمذي وابن ماجه."},
+{n:13, title:"الحديث الثالث عشر: لا يؤمن أحدكم حتى يحب لأخيه", txt:"عَنْ أَبِي حَمْزَةَ أَنَسِ بْنِ مالِكٍ رضي الله عنه خادِمِ رَسُولِ اللَّهِ ﷺ عَنِ النَّبِيِّ ﷺ قالَ: «لا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ ما يُحِبُّ لِنَفْسِهِ».", src:"رواه البخاري ومسلم."},
+{n:14, title:"الحديث الرابع عشر: لا يحل دم امرئ مسلم إلا بإحدى ثلاث", txt:"عَنِ ابْنِ مَسْعُودٍ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «لا يَحِلُّ دَمُ امْرِئٍ مُسْلِمٍ يَشْهَدُ أَنْ لا إلَهَ إلّا اللَّهُ وَأَنِّي رَسُولُ اللَّهِ، إلّا بِإِحْدَى ثَلاثٍ: الثَّيِّبُ الزّانِي، وَالنَّفْسُ بِالنَّفْسِ، وَالتّارِكُ لِدِينِهِ المُفارِقُ لِلْجَماعَةِ».", src:"رواه البخاري ومسلم."},
+{n:15, title:"الحديث الخامس عشر: من كان يؤمن بالله واليوم الآخر", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه أَنَّ رَسُولَ اللَّهِ ﷺ قالَ: «مَنْ كانَ يُؤْمِنُ بِاللَّهِ وَاليَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ، وَمَنْ كانَ يُؤْمِنُ بِاللَّهِ وَاليَوْمِ الآخِرِ فَلْيُكْرِمْ جارَهُ، وَمَنْ كانَ يُؤْمِنُ بِاللَّهِ وَاليَوْمِ الآخِرِ فَلْيُكْرِمْ ضَيْفَهُ».", src:"رواه البخاري ومسلم."},
+{n:16, title:"الحديث السادس عشر: لا تغضب", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه أَنَّ رَجُلًا قالَ لِلنَّبِيِّ ﷺ: أَوْصِنِي. قالَ: «لا تَغْضَبْ» فَرَدَّدَ مِرارًا، قالَ: «لا تَغْضَبْ».", src:"رواه البخاري."},
+{n:17, title:"الحديث السابع عشر: إن الله كتب الإحسان على كل شيء", txt:"عَنْ أَبِي يَعْلَى شَدّادِ بْنِ أَوْسٍ رضي الله عنه عَنْ رَسُولِ اللَّهِ ﷺ قالَ: «إنَّ اللَّهَ كَتَبَ الإِحْسانَ عَلَى كُلِّ شَيْءٍ، فَإِذا قَتَلْتُمْ فَأَحْسِنُوا القِتْلَةَ، وَإِذا ذَبَحْتُمْ فَأَحْسِنُوا الذِّبْحَةَ، وَلْيُحِدَّ أَحَدُكُمْ شَفْرَتَهُ، وَلْيُرِحْ ذَبِيحَتَهُ».", src:"رواه مسلم."},
+{n:18, title:"الحديث الثامن عشر: اتق الله حيثما كنت", txt:"عَنْ أَبِي ذَرٍّ جُنْدَبِ بْنِ جُنادَةَ وَأَبِي عَبْدِ الرَّحْمَنِ مُعاذِ بْنِ جَبَلٍ رضي الله عنهما عَنْ رَسُولِ اللَّهِ ﷺ قالَ: «اتَّقِ اللَّهَ حَيْثُما كُنْتَ، وَأَتْبِعِ السَّيِّئَةَ الحَسَنَةَ تَمْحُها، وَخالِقِ النّاسَ بِخُلُقٍ حَسَنٍ».", src:"رواه الترمذي وقال: حديث حسن."},
+{n:19, title:"الحديث التاسع عشر: احفظ الله يحفظك", txt:"عَنْ عَبْدِ اللَّهِ بْنِ عَبّاسٍ رضي الله عنهما قالَ: كُنْتُ خَلْفَ رَسُولِ اللَّهِ ﷺ يَوْمًا، فَقالَ: «يا غُلامُ، إنِّي أُعَلِّمُكَ كَلِماتٍ: احْفَظِ اللَّهَ يَحْفَظْكَ، احْفَظِ اللَّهَ تَجِدْهُ تُجاهَكَ، إذا سَأَلْتَ فاسْأَلِ اللَّهَ، وَإِذا اسْتَعَنْتَ فاسْتَعِنْ بِاللَّهِ، وَاعْلَمْ أَنَّ الأُمَّةَ لَوِ اجْتَمَعَتْ عَلَى أَنْ يَنْفَعُوكَ بِشَيْءٍ لَمْ يَنْفَعُوكَ إلّا بِشَيْءٍ قَدْ كَتَبَهُ اللَّهُ لَكَ، وَإِنِ اجْتَمَعُوا عَلَى أَنْ يَضُرُّوكَ بِشَيْءٍ لَمْ يَضُرُّوكَ إلّا بِشَيْءٍ قَدْ كَتَبَهُ اللَّهُ عَلَيْكَ، رُفِعَتِ الأَقْلامُ وَجَفَّتِ الصُّحُفُ».", src:"رواه الترمذي وقال: حديث حسن صحيح."},
+{n:20, title:"الحديث العشرون: إذا لم تستح فاصنع ما شئت", txt:"عَنْ أَبِي مَسْعُودٍ عُقْبَةَ بْنِ عَمْرٍو الأَنْصَارِيِّ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «إنَّ مِمّا أَدْرَكَ النّاسُ مِنْ كَلامِ النُّبُوَّةِ الأُولَى: إذا لَمْ تَسْتَحِ فاصْنَعْ ما شِئْتَ».", src:"رواه البخاري."},
+{n:21, title:"الحديث الحادي والعشرون: قل آمنت بالله ثم استقم", txt:"عَنْ أَبِي عَمْرٍو سُفْيانَ بْنِ عَبْدِ اللَّهِ رضي الله عنه قالَ: قُلْتُ يا رَسُولَ اللَّهِ، قُلْ لِي فِي الإِسْلامِ قَوْلًا لا أَسْأَلُ عَنْهُ أَحَدًا غَيْرَكَ. قالَ: «قُلْ آمَنْتُ بِاللَّهِ ثُمَّ اسْتَقِمْ».", src:"رواه مسلم."},
+{n:22, title:"الحديث الثاني والعشرون: أرأيت إذا صليت المكتوبات", txt:"عَنْ أَبِي عَبْدِ اللَّهِ جابِرِ بْنِ عَبْدِ اللَّهِ رضي الله عنهما أَنَّ رَجُلًا سَأَلَ رَسُولَ اللَّهِ ﷺ فَقالَ: أَرَأَيْتَ إذا صَلَّيْتُ المَكْتُوباتِ، وَصُمْتُ رَمَضانَ، وَأَحْلَلْتُ الحَلالَ، وَحَرَّمْتُ الحَرامَ، وَلَمْ أَزِدْ عَلَى ذَلِكَ شَيْئًا، أَأَدْخُلُ الجَنَّةَ؟ قالَ: «نَعَمْ».", src:"رواه مسلم."},
+{n:23, title:"الحديث الثالث والعشرون: الطهور شطر الإيمان", txt:"عَنْ أَبِي مالِكٍ الحارِثِ بْنِ عاصِمٍ الأَشْعَرِيِّ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «الطُّهُورُ شَطْرُ الإِيمانِ، وَالحَمْدُ لِلَّهِ تَمْلَأُ المِيزانَ، وَسُبْحانَ اللَّهِ وَالحَمْدُ لِلَّهِ تَمْلَآنِ ما بَيْنَ السَّماءِ وَالأَرْضِ، وَالصَّلاةُ نُورٌ، وَالصَّدَقَةُ بُرْهانٌ، وَالصَّبْرُ ضِياءٌ، وَالقُرْآنُ حُجَّةٌ لَكَ أَوْ عَلَيْكَ، كُلُّ النّاسِ يَغْدُو، فَبائِعٌ نَفْسَهُ فَمُعْتِقُها أَوْ مُوبِقُها».", src:"رواه مسلم."},
+{n:24, title:"الحديث الرابع والعشرون: الحديث القدسي في تحريم الظلم", txt:"عَنْ أَبِي ذَرٍّ الغِفارِيِّ رضي الله عنه عَنِ النَّبِيِّ ﷺ فِيما يَرْوِيهِ عَنْ رَبِّهِ تَبارَكَ وَتَعالَى أَنَّهُ قالَ: «يا عِبادِي، إنِّي حَرَّمْتُ الظُّلْمَ عَلَى نَفْسِي وَجَعَلْتُهُ بَيْنَكُمْ مُحَرَّمًا فَلا تَظالَمُوا... إنَّما هِيَ أَعْمالُكُمْ أُحْصِيها لَكُمْ ثُمَّ أُوَفِّيكُمْ إيّاها، فَمَنْ وَجَدَ خَيْرًا فَلْيَحْمَدِ اللَّهَ، وَمَنْ وَجَدَ غَيْرَ ذَلِكَ فَلا يَلُومَنَّ إلّا نَفْسَهُ».", src:"رواه مسلم."},
+{n:25, title:"الحديث الخامس والعشرون: التسبيح والتكبير صدقة", txt:"عَنْ أَبِي ذَرٍّ رضي الله عنه أَنَّ ناسًا مِنْ أَصْحابِ رَسُولِ اللَّهِ ﷺ قالُوا لِلنَّبِيِّ ﷺ: يا رَسُولَ اللَّهِ ذَهَبَ أَهْلُ الدُّثُورِ بِالأُجُورِ. قالَ: «أَوَلَيْسَ قَدْ جَعَلَ اللَّهُ لَكُمْ ما تَصَّدَّقُونَ؟ إنَّ بِكُلِّ تَسْبِيحَةٍ صَدَقَةً، وَكُلِّ تَكْبِيرَةٍ صَدَقَةً، وَكُلِّ تَحْمِيدَةٍ صَدَقَةً، وَكُلِّ تَهْلِيلَةٍ صَدَقَةً، وَأَمْرٌ بِمَعْرُوفٍ صَدَقَةٌ، وَنَهْيٌ عَنْ مُنْكَرٍ صَدَقَةٌ، وَفِي بُضْعِ أَحَدِكُمْ صَدَقَةٌ».", src:"رواه مسلم."},
+{n:26, title:"الحديث السادس والعشرون: كل سُلامى من الناس عليه صدقة", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «كُلُّ سُلامَى مِنَ النّاسِ عَلَيْهِ صَدَقَةٌ، كُلَّ يَوْمٍ تَطْلُعُ فِيهِ الشَّمْسُ: تَعْدِلُ بَيْنَ اثْنَيْنِ صَدَقَةٌ، وَتُعِينُ الرَّجُلَ فِي دابَّتِهِ فَتَحْمِلُهُ عَلَيْها أَوْ تَرْفَعُ لَهُ عَلَيْها مَتاعَهُ صَدَقَةٌ، وَالكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ، وَبِكُلِّ خُطْوَةٍ تَمْشِيها إلَى الصَّلاةِ صَدَقَةٌ، وَتُمِيطُ الأَذَى عَنِ الطَّرِيقِ صَدَقَةٌ».", src:"رواه البخاري ومسلم."},
+{n:27, title:"الحديث السابع والعشرون: البر حسن الخلق", txt:"عَنِ النَّوّاسِ بْنِ سَمْعانَ رضي الله عنه عَنِ النَّبِيِّ ﷺ قالَ: «البِرُّ حُسْنُ الخُلُقِ، وَالإِثْمُ ما حاكَ فِي صَدْرِكَ وَكَرِهْتَ أَنْ يَطَّلِعَ عَلَيْهِ النّاسُ». وعَنْ وابِصَةَ بْنِ مَعْبَدٍ رضي الله عنه قالَ: أَتَيْتُ رَسُولَ اللَّهِ ﷺ فَقالَ: «جِئْتَ تَسْأَلُ عَنِ البِرِّ؟» قُلْتُ: نَعَمْ. قالَ: «اسْتَفْتِ قَلْبَكَ، البِرُّ ما اطْمَأَنَّتْ إلَيْهِ النَّفْسُ وَاطْمَأَنَّ إلَيْهِ القَلْبُ، وَالإِثْمُ ما حاكَ فِي النَّفْسِ وَتَرَدَّدَ فِي الصَّدْرِ، وَإِنْ أَفْتاكَ النّاسُ وَأَفْتَوْكَ».", src:"حديث حسن، رواه أحمد والدارمي بإسناد حسن؛ والأول رواه مسلم."},
+{n:28, title:"الحديث الثامن والعشرون: عليكم بسنتي وسنة الخلفاء الراشدين", txt:"عَنْ أَبِي نَجِيحٍ العِرْباضِ بْنِ سارِيَةَ رضي الله عنه قالَ: وَعَظَنا رَسُولُ اللَّهِ ﷺ مَوْعِظَةً وَجِلَتْ مِنْها القُلُوبُ وَذَرَفَتْ مِنْها العُيُونُ، فَقُلْنا: يا رَسُولَ اللَّهِ كَأَنَّها مَوْعِظَةُ مُوَدِّعٍ فَأَوْصِنا. قالَ: «أُوصِيكُمْ بِتَقْوَى اللَّهِ، وَالسَّمْعِ وَالطّاعَةِ وَإِنْ تَأَمَّرَ عَلَيْكُمْ عَبْدٌ، فَإِنَّهُ مَنْ يَعِشْ مِنْكُمْ فَسَيَرَى اخْتِلافًا كَثِيرًا، فَعَلَيْكُمْ بِسُنَّتِي وَسُنَّةِ الخُلَفاءِ الرّاشِدِينَ المَهْدِيِّينَ، عَضُّوا عَلَيْها بِالنَّواجِذِ، وَإِيّاكُمْ وَمُحْدَثاتِ الأُمُورِ فَإِنَّ كُلَّ بِدْعَةٍ ضَلالَةٌ».", src:"رواه أبو داود والترمذي وقال: حديث حسن صحيح."},
+{n:29, title:"الحديث التاسع والعشرون: أبواب الخير ورأس الأمر", txt:"عَنْ مُعاذِ بْنِ جَبَلٍ رضي الله عنه قالَ: قُلْتُ يا رَسُولَ اللَّهِ أَخْبِرْنِي بِعَمَلٍ يُدْخِلُنِي الجَنَّةَ وَيُباعِدُنِي مِنَ النّارِ. قالَ: «لَقَدْ سَأَلْتَ عَنْ عَظِيمٍ، وَإِنَّهُ لَيَسِيرٌ عَلَى مَنْ يَسَّرَهُ اللَّهُ عَلَيْهِ: تَعْبُدُ اللَّهَ لا تُشْرِكُ بِهِ شَيْئًا، وَتُقِيمُ الصَّلاةَ، وَتُؤْتِي الزَّكاةَ، وَتَصُومُ رَمَضانَ، وَتَحُجُّ البَيْتَ... رَأْسُ الأَمْرِ الإِسْلامُ، وَعَمُودُهُ الصَّلاةُ، وَذُرْوَةُ سَنامِهِ الجِهادُ».", src:"رواه الترمذي وقال: حديث حسن صحيح."},
+{n:30, title:"الحديث الثلاثون: فرائض الله وحدوده وسكوته رحمة", txt:"عَنْ أَبِي ثَعْلَبَةَ الخُشَنِيِّ رضي الله عنه عَنْ رَسُولِ اللَّهِ ﷺ قالَ: «إنَّ اللَّهَ تَعالَى فَرَضَ فَرائِضَ فَلا تُضَيِّعُوها، وَحَدَّ حُدُودًا فَلا تَعْتَدُوها، وَحَرَّمَ أَشْياءَ فَلا تَنْتَهِكُوها، وَسَكَتَ عَنْ أَشْياءَ رَحْمَةً لَكُمْ غَيْرَ نِسْيانٍ فَلا تَبْحَثُوا عَنْها».", src:"حديث حسن، رواه الدارقطني وغيره."},
+{n:31, title:"الحديث الحادي والثلاثون: ازهد في الدنيا يحبك الله", txt:"عَنْ أَبِي العَبّاسِ سَهْلِ بْنِ سَعْدٍ السّاعِدِيِّ رضي الله عنه قالَ: جاءَ رَجُلٌ إلَى النَّبِيِّ ﷺ فَقالَ: يا رَسُولَ اللَّهِ دُلَّنِي عَلَى عَمَلٍ إذا عَمِلْتُهُ أَحَبَّنِي اللَّهُ وَأَحَبَّنِي النّاسُ. فَقالَ: «ازْهَدْ فِي الدُّنْيا يُحِبَّكَ اللَّهُ، وَازْهَدْ فِيما عِنْدَ النّاسِ يُحِبَّكَ النّاسُ».", src:"حديث حسن، رواه ابن ماجه بأسانيد حسنة."},
+{n:32, title:"الحديث الثاني والثلاثون: لا ضرر ولا ضرار", txt:"عَنْ أَبِي سَعِيدٍ سَعْدِ بْنِ مالِكٍ الخُدْرِيِّ رضي الله عنه أَنَّ رَسُولَ اللَّهِ ﷺ قالَ: «لا ضَرَرَ وَلا ضِرارَ».", src:"حديث حسن، رواه ابن ماجه والدارقطني وغيرهما مسندًا، ورواه مالك في الموطأ مرسلًا."},
+{n:33, title:"الحديث الثالث والثلاثون: البينة على المدعي واليمين على من أنكر", txt:"عَنِ ابْنِ عَبّاسٍ رضي الله عنهما أَنَّ رَسُولَ اللَّهِ ﷺ قالَ: «لَوْ يُعْطَى النّاسُ بِدَعْواهُمْ لادَّعَى رِجالٌ أَمْوالَ قَوْمٍ وَدِماءَهُمْ، لَكِنَّ البَيِّنَةَ عَلَى المُدَّعِي وَاليَمِينَ عَلَى مَنْ أَنْكَرَ».", src:"حديث حسن، رواه البيهقي وغيره، وبعضه في الصحيحين."},
+{n:34, title:"الحديث الرابع والثلاثون: من رأى منكم منكرًا فليغيره", txt:"عَنْ أَبِي سَعِيدٍ الخُدْرِيِّ رضي الله عنه قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: «مَنْ رَأَى مِنْكُمْ مُنْكَرًا فَلْيُغَيِّرْهُ بِيَدِهِ، فَإِنْ لَمْ يَسْتَطِعْ فَبِلِسانِهِ، فَإِنْ لَمْ يَسْتَطِعْ فَبِقَلْبِهِ، وَذَلِكَ أَضْعَفُ الإِيمانِ».", src:"رواه مسلم."},
+{n:35, title:"الحديث الخامس والثلاثون: المسلم أخو المسلم", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «لا تَحاسَدُوا، وَلا تَناجَشُوا، وَلا تَباغَضُوا، وَلا تَدابَرُوا، وَلا يَبِعْ بَعْضُكُمْ عَلَى بَيْعِ بَعْضٍ، وَكُونُوا عِبادَ اللَّهِ إخْوانًا، المُسْلِمُ أَخُو المُسْلِمِ لا يَظْلِمُهُ وَلا يَخْذُلُهُ وَلا يَكْذِبُهُ وَلا يَحْقِرُهُ، التَّقْوَى هاهُنا، بِحَسْبِ امْرِئٍ مِنَ الشَّرِّ أَنْ يَحْقِرَ أَخاهُ المُسْلِمَ، كُلُّ المُسْلِمِ عَلَى المُسْلِمِ حَرامٌ: دَمُهُ وَمالُهُ وَعِرْضُهُ».", src:"رواه مسلم."},
+{n:36, title:"الحديث السادس والثلاثون: من نفّس عن مؤمن كربة", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه عَنِ النَّبِيِّ ﷺ قالَ: «مَنْ نَفَّسَ عَنْ مُؤْمِنٍ كُرْبَةً مِنْ كُرَبِ الدُّنْيا نَفَّسَ اللَّهُ عَنْهُ كُرْبَةً مِنْ كُرَبِ يَوْمِ القِيامَةِ، وَمَنْ يَسَّرَ عَلَى مُعْسِرٍ يَسَّرَ اللَّهُ عَلَيْهِ فِي الدُّنْيا وَالآخِرَةِ، وَمَنْ سَتَرَ مُسْلِمًا سَتَرَهُ اللَّهُ فِي الدُّنْيا وَالآخِرَةِ، وَاللَّهُ فِي عَوْنِ العَبْدِ ما كانَ العَبْدُ فِي عَوْنِ أَخِيهِ، وَمَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إلَى الجَنَّةِ».", src:"رواه مسلم."},
+{n:37, title:"الحديث السابع والثلاثون: الحسنات بعشر أمثالها", txt:"عَنِ ابْنِ عَبّاسٍ رضي الله عنهما عَنْ رَسُولِ اللَّهِ ﷺ فِيما يَرْوِيهِ عَنْ رَبِّهِ تَبارَكَ وَتَعالَى قالَ: «إنَّ اللَّهَ كَتَبَ الحَسَناتِ وَالسَّيِّئاتِ ثُمَّ بَيَّنَ ذَلِكَ: فَمَنْ هَمَّ بِحَسَنَةٍ فَلَمْ يَعْمَلْها كَتَبَها اللَّهُ عِنْدَهُ حَسَنَةً كامِلَةً، وَإِنْ هَمَّ بِها فَعَمِلَها كَتَبَها اللَّهُ عِنْدَهُ عَشْرَ حَسَناتٍ إلَى سَبْعِمِائَةِ ضِعْفٍ إلَى أَضْعافٍ كَثِيرَةٍ، وَإِنْ هَمَّ بِسَيِّئَةٍ فَلَمْ يَعْمَلْها كَتَبَها اللَّهُ عِنْدَهُ حَسَنَةً كامِلَةً، وَإِنْ هَمَّ بِها فَعَمِلَها كَتَبَها اللَّهُ سَيِّئَةً واحِدَةً».", src:"رواه البخاري ومسلم."},
+{n:38, title:"الحديث الثامن والثلاثون: من عادى لي وليًا", txt:"عَنْ أَبِي هُرَيْرَةَ رضي الله عنه قالَ: قالَ رَسُولُ اللَّهِ ﷺ: إنَّ اللَّهَ تَعالَى قالَ: «مَنْ عادَى لِي وَلِيًّا فَقَدْ آذَنْتُهُ بِالحَرْبِ، وَما تَقَرَّبَ إلَيَّ عَبْدِي بِشَيْءٍ أَحَبَّ إلَيَّ مِمّا افْتَرَضْتُهُ عَلَيْهِ، وَلا يَزالُ عَبْدِي يَتَقَرَّبُ إلَيَّ بِالنَّوافِلِ حَتَّى أُحِبَّهُ، فَإِذا أَحْبَبْتُهُ كُنْتُ سَمْعَهُ الَّذِي يَسْمَعُ بِهِ وَبَصَرَهُ الَّذِي يُبْصِرُ بِهِ وَيَدَهُ الَّتِي يَبْطِشُ بِها وَرِجْلَهُ الَّتِي يَمْشِي بِها، وَلَئِنْ سَأَلَنِي لَأُعْطِيَنَّهُ، وَلَئِنِ اسْتَعاذَنِي لَأُعِيذَنَّهُ».", src:"رواه البخاري."},
+{n:39, title:"الحديث التاسع والثلاثون: رفع القلم عن الخطأ والنسيان والإكراه", txt:"عَنِ ابْنِ عَبّاسٍ رضي الله عنهما أَنَّ رَسُولَ اللَّهِ ﷺ قالَ: «إنَّ اللَّهَ تَجاوَزَ لِي عَنْ أُمَّتِي الخَطَأَ وَالنِّسْيانَ وَما اسْتُكْرِهُوا عَلَيْهِ».", src:"حديث حسن، رواه ابن ماجه والبيهقي."},
+{n:40, title:"الحديث الأربعون: كن في الدنيا كأنك غريب", txt:"عَنِ ابْنِ عُمَرَ رضي الله عنهما قالَ: أَخَذَ رَسُولُ اللَّهِ ﷺ بِمَنْكِبِي وَقالَ: «كُنْ فِي الدُّنْيا كَأَنَّكَ غَرِيبٌ أَوْ عابِرُ سَبِيلٍ». وَكانَ ابْنُ عُمَرَ رضي الله عنهما يَقُولُ: إذا أَمْسَيْتَ فَلا تَنْتَظِرِ الصَّباحَ، وَإِذا أَصْبَحْتَ فَلا تَنْتَظِرِ المَساءَ، وَخُذْ مِنْ صِحَّتِكَ لِمَرَضِكَ، وَمِنْ حَياتِكَ لِمَوْتِكَ.", src:"رواه البخاري."},
+{n:41, title:"الحديث الحادي والأربعون: لا يؤمن أحدكم حتى يكون هواه تبعًا", txt:"عَنْ أَبِي مُحَمَّدٍ عَبْدِ اللَّهِ بْنِ عَمْرِو بْنِ العاصِ رضي الله عنهما قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «لا يُؤْمِنُ أَحَدُكُمْ حَتَّى يَكُونَ هَواهُ تَبَعًا لِما جِئْتُ بِهِ».", src:"حديث حسن صحيح."},
+{n:42, title:"الحديث الثاني والأربعون: سعة مغفرة الله تعالى", txt:"عَنْ أَنَسِ بْنِ مالِكٍ رضي الله عنه قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: قالَ اللَّهُ تَعالَى: «يا ابْنَ آدَمَ إنَّكَ ما دَعَوْتَنِي وَرَجَوْتَنِي غَفَرْتُ لَكَ عَلَى ما كانَ مِنْكَ وَلا أُبالِي، يا ابْنَ آدَمَ لَوْ بَلَغَتْ ذُنُوبُكَ عَنانَ السَّماءِ ثُمَّ اسْتَغْفَرْتَنِي غَفَرْتُ لَكَ، يا ابْنَ آدَمَ إنَّكَ لَوْ أَتَيْتَنِي بِقُرابِ الأَرْضِ خَطايا ثُمَّ لَقِيتَنِي لا تُشْرِكُ بِي شَيْئًا لَأَتَيْتُكَ بِقُرابِها مَغْفِرَةً».", src:"رواه الترمذي وقال: حديث حسن صحيح."},
+{n:43, title:"الحديث الثالث والأربعون: إلحاق الفرائض بأهلها (زيادة ابن رجب)", txt:"عَنِ ابْنِ عَبّاسٍ رضي الله عنهما قالَ: قالَ رَسُولُ اللَّهِ ﷺ: «أَلْحِقُوا الفَرائِضَ بِأَهْلِها، فَما أَبْقَتِ الفَرائِضُ فَلِأَوْلَى رَجُلٍ ذَكَرٍ».", src:"رواه البخاري ومسلم."},
+{n:44, title:"الحديث الرابع والأربعون: الرضاعة تحرم ما تحرم الولادة", txt:"عَنْ عائِشَةَ رضي الله عنها عَنِ النَّبِيِّ ﷺ قالَ: «الرَّضاعَةُ تُحَرِّمُ ما تُحَرِّمُ الوِلادَةُ».", src:"رواه البخاري ومسلم."},
+{n:45, title:"الحديث الخامس والأربعون: تحريم بيع الخمر والميتة", txt:"عَنْ جابِرِ بْنِ عَبْدِ اللَّهِ رضي الله عنهما أَنَّهُ سَمِعَ رَسُولَ اللَّهِ ﷺ عامَ الفَتْحِ وَهُوَ بِمَكَّةَ يَقُولُ: «إنَّ اللَّهَ وَرَسُولَهُ حَرَّمَ بَيْعَ الخَمْرِ وَالمَيْتَةِ وَالخِنْزِيرِ وَالأَصْنامِ»، فَقِيلَ: يا رَسُولَ اللَّهِ أَرَأَيْتَ شُحُومَ المَيْتَةِ فَإِنَّها يُطْلَى بِها السُّفُنُ وَيُدْهَنُ بِها الجُلُودُ؟ فَقالَ: «لا، هُوَ حَرامٌ»، ثُمَّ قالَ عِنْدَ ذَلِكَ: «قاتَلَ اللَّهُ اليَهُودَ، إنَّ اللَّهَ حَرَّمَ عَلَيْهِمُ الشُّحُومَ فَأَجْمَلُوهُ ثُمَّ باعُوهُ فَأَكَلُوا ثَمَنَهُ».", src:"رواه البخاري ومسلم."},
+{n:46, title:"الحديث السادس والأربعون: كل مسكر حرام", txt:"عَنْ أَبِي بُرْدَةَ عَنْ أَبِيهِ عَنْ أَبِي مُوسَى الأَشْعَرِيِّ رضي الله عنه أَنَّ النَّبِيَّ ﷺ بَعَثَهُ إلَى اليَمَنِ فَسَأَلَهُ عَنْ أَشْرِبَةٍ تُصْنَعُ بِها، فَقالَ: وَما هِيَ؟ قالَ: البِتْعُ وَالمِزْرُ. فَقالَ: «كُلُّ مُسْكِرٍ حَرامٌ».", src:"رواه البخاري."},
+{n:47, title:"الحديث السابع والأربعون: بحسب ابن آدم أكلات يقمن صلبه", txt:"عَنِ المِقْدامِ بْنِ مَعْدِيَكْرِبَ رضي الله عنه قالَ: سَمِعْتُ رَسُولَ اللَّهِ ﷺ يَقُولُ: «ما مَلَأَ آدَمِيٌّ وِعاءً شَرًّا مِنْ بَطْنٍ، بِحَسْبِ ابْنِ آدَمَ أُكُلاتٌ يُقِمْنَ صُلْبَهُ، فَإِنْ كانَ لا مَحالَةَ فَثُلُثٌ لِطَعامِهِ وَثُلُثٌ لِشَرابِهِ وَثُلُثٌ لِنَفَسِهِ».", src:"رواه أحمد والترمذي وابن ماجه، وقال الترمذي: حديث حسن."},
+{n:48, title:"الحديث الثامن والأربعون: علامات المنافق الأربع", txt:"عَنْ عَبْدِ اللَّهِ بْنِ عَمْرٍو رضي الله عنهما أَنَّ النَّبِيَّ ﷺ قالَ: «أَرْبَعٌ مَنْ كُنَّ فِيهِ كانَ مُنافِقًا، وَإِنْ كانَتْ خَصْلَةٌ مِنْهُنَّ فِيهِ كانَتْ فِيهِ خَصْلَةٌ مِنَ النِّفاقِ حَتَّى يَدَعَها: مَنْ إذا حَدَّثَ كَذَبَ، وَإِذا وَعَدَ أَخْلَفَ، وَإِذا خاصَمَ فَجَرَ، وَإِذا عاهَدَ غَدَرَ».", src:"رواه البخاري ومسلم."},
+{n:49, title:"الحديث التاسع والأربعون: لو توكلتم على الله حق توكله", txt:"عَنْ عُمَرَ بْنِ الخَطّابِ رضي الله عنه عَنِ النَّبِيِّ ﷺ قالَ: «لَوْ أَنَّكُمْ كُنْتُمْ تَوَكَّلُونَ عَلَى اللَّهِ حَقَّ تَوَكُّلِهِ لَرَزَقَكُمْ كَما يَرْزُقُ الطَّيْرَ، تَغْدُو خِماصًا وَتَرُوحُ بِطانًا».", src:"رواه الترمذي وقال: حسن صحيح."},
+{n:50, title:"الحديث الخمسون: لا يزال لسانك رطبًا من ذكر الله", txt:"عَنْ عَبْدِ اللَّهِ بْنِ بُسْرٍ رضي الله عنه قالَ: أَتَى النَّبِيَّ ﷺ رَجُلٌ فَقالَ: يا رَسُولَ اللَّهِ إنَّ شَرائِعَ الإِسْلامِ قَدْ كَثُرَتْ عَلَيْنا، فَأَخْبِرْنِي بِشَيْءٍ أَتَشَبَّثُ بِهِ. قالَ: «لا يَزالُ لِسانُكَ رَطْبًا مِنْ ذِكْرِ اللَّهِ عَزَّ وَجَلَّ».", src:"رواه أحمد والترمذي."}
+];
+
+function renderHadith(list, container, term){
+  container.innerHTML = '';
+  if(!list.length){ container.innerHTML = '<div class="status">لا توجد نتائج.</div>'; return; }
+  list.forEach(h=>{
+    const div = document.createElement('div');
+    div.className = 'hadith-item';
+    let txt = h.txt;
+    if(term){
+      const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g');
+      txt = txt.replace(re, m=>'<mark>'+m+'</mark>');
+    }
+    div.innerHTML = '<h3>'+h.title+'</h3><div class="txt">'+txt+'</div><div class="src">'+h.src+'</div>';
+    container.appendChild(div);
+  });
+}
+renderHadith(HADITH, document.getElementById('hadithList'));
+
+document.getElementById('hadithSearch').addEventListener('input', e=>{
+  const q = e.target.value.trim();
+  const filtered = q ? HADITH.filter(h=>h.txt.includes(q)||h.title.includes(q)) : HADITH;
+  renderHadith(filtered, document.getElementById('hadithList'), q);
+});
+document.getElementById('hadithSearch2').addEventListener('input', e=>{
+  const q = e.target.value.trim();
+  const box = document.getElementById('hadithSearchResults');
+  if(!q){ box.innerHTML=''; return; }
+  const filtered = HADITH.filter(h=>h.txt.includes(q)||h.title.includes(q));
+  renderHadith(filtered, box, q);
+});
+</script>
+</body>
+</html>
