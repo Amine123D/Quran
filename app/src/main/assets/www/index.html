@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>القرآن الكريم والأحاديث النبوية</title>
+<style>
+  :root{
+    --bg:#f7f3ea; --panel:#ffffff; --ink:#22261f; --muted:#6b6558;
+    --accent:#0f6b4c; --accent-2:#c9a24b; --border:#e4ddc9; --danger:#a13d2a;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14170f; --panel:#1c2016; --ink:#eee7d6; --muted:#a7a08c;
+      --accent:#3fae82; --accent-2:#d9b45f; --border:#33392a;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14170f; --panel:#1c2016; --ink:#eee7d6; --muted:#a7a08c;
+    --accent:#3fae82; --accent-2:#d9b45f; --border:#33392a;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100%; background:var(--bg); color:var(--ink);
+    font-family:"Noto Naskh Arabic","Amiri","Segoe UI",Tahoma,sans-serif;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  }
+  header{
+    position:sticky; top:0; z-index:20;
+    padding:calc(14px + env(safe-area-inset-top,0px)) 16px 10px;
+    background:linear-gradient(180deg, var(--accent), #0b5139);
+    color:#fdf9ee; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+  header h1{margin:0; font-size:20px; font-weight:700;}
+  header p{margin:4px 0 0; font-size:12px; opacity:.85;}
+  nav.tabs{
+    display:flex; gap:6px; padding:10px 12px; max-width:900px; margin:0 auto;
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    flex:1; min-width:100px; padding:10px 8px; border-radius:10px; border:1px solid var(--border);
+    background:var(--panel); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700;
